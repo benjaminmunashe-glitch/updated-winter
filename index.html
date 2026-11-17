@@ -56,7 +56,12 @@
     </select>
     <div id="ownkey">
       <label for="model">Model name</label>
-      <input id="model">
+      <input id="model" list="modelList">
+      <datalist id="modelList">
+        <option value="openai/gpt-oss-120b">Groq: best for this tool</option>
+        <option value="openai/gpt-oss-20b">Groq: cheaper</option>
+        <option value="llama-3.1-8b-instant">Groq: fastest</option>
+      </datalist>
       <label for="key">API key (kept in this browser only, never in the code)</label>
       <!-- Plain text box masked with CSS, so browser password managers do not autofill a saved password into it -->
       <input id="key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore
@@ -147,10 +152,13 @@ const DEFAULT_MODELS = {
 };
 // US$ per million tokens [input, output]. Groq price from console.groq.com/docs/models (Nov 2026).
 const DEFAULT_PRICES = { relay: [0.15, 0.60], groq: [0.15, 0.60], gemini: [0.30, 2.50], openai: [0.15, 0.60], anthropic: [1.00, 5.00] };
-// Models no longer open to normal accounts: replace them if they were saved earlier.
-const RETIRED = ["llama-3.3-70b-versatile"];
+// Groq models open to normal accounts (console.groq.com/docs/models, Nov 2026) and their prices.
+const GROQ_MODELS = { "openai/gpt-oss-120b": [0.15, 0.60], "openai/gpt-oss-20b": [0.075, 0.30], "llama-3.1-8b-instant": [0.05, 0.08] };
+// Built-in settings: Groq + gpt-oss-120b. If a browser has a wrong or retired Groq model saved, correct it.
 try {
-  if (RETIRED.includes(localStorage.getItem("ww_model"))) {
+  const p = localStorage.getItem("ww_provider");
+  if (!p) localStorage.setItem("ww_provider", "groq");
+  if ((p || "groq") === "groq" && !(localStorage.getItem("ww_model") in GROQ_MODELS)) {
     localStorage.setItem("ww_model", "openai/gpt-oss-120b");
     localStorage.setItem("ww_priceIn", "0.15"); localStorage.setItem("ww_priceOut", "0.60");
   }
@@ -192,6 +200,12 @@ $("save").onclick = () => {
   const clean = s => s.replace(/[‐-―−]/g, "-").replace(/\s+/g, "");
   $("model").value = clean($("model").value);
   $("key").value = clean($("key").value);
+  if ($("provider").value === "groq" && !($("model").value in GROQ_MODELS)) {
+    $("status").textContent = `"${$("model").value}" is not a Groq model. Use one from the list, e.g. openai/gpt-oss-120b.`;
+    return;
+  }
+  if ($("provider").value === "groq") [$("priceIn").value, $("priceOut").value] = GROQ_MODELS[$("model").value];
+  ls.set("ww_provider", $("provider").value);
   ls.set("ww_model", $("model").value);
   ls.set("ww_key", $("key").value);
   ls.set("ww_priceIn", $("priceIn").value.trim());
