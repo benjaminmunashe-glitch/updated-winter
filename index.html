@@ -58,7 +58,9 @@
       <label for="model">Model name</label>
       <input id="model">
       <label for="key">API key (kept in this browser only, never in the code)</label>
-      <input id="key" type="password" autocomplete="off">
+      <!-- Plain text box masked with CSS, so browser password managers do not autofill a saved password into it -->
+      <input id="key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore
+             style="-webkit-text-security:disc;text-security:disc" placeholder="Paste your API key here">
     </div>
     <label>Model price in US$ per million tokens (for cost per question)</label>
     <div style="display:flex;gap:8px">
