@@ -188,8 +188,12 @@ $("provider").onchange = () => {
 };
 $("save").onclick = () => {
   ls.set("ww_provider", $("provider").value);
-  ls.set("ww_model", $("model").value.trim());
-  ls.set("ww_key", $("key").value.trim());
+  // Clean pasted text: odd unicode hyphens become "-", and spaces are removed
+  const clean = s => s.replace(/[‐-―−]/g, "-").replace(/\s+/g, "");
+  $("model").value = clean($("model").value);
+  $("key").value = clean($("key").value);
+  ls.set("ww_model", $("model").value);
+  ls.set("ww_key", $("key").value);
   ls.set("ww_priceIn", $("priceIn").value.trim());
   ls.set("ww_priceOut", $("priceOut").value.trim());
   $("status").textContent = "Saved in this browser.";
