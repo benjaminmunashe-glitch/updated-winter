@@ -142,10 +142,19 @@ const LIMIT = { 1: 1.0, 2: 0.5, 3: -1.0 };
 const CAPACITY = { Cavan: 900, Ballyjamesduff: 420, Bailieborough: 18, Cootehill: 300, Virginia: 320 };
 
 const DEFAULT_MODELS = {
-  relay: "", groq: "llama-3.3-70b-versatile", gemini: "gemini-2.5-flash",
+  relay: "", groq: "openai/gpt-oss-120b", gemini: "gemini-2.5-flash",
   openai: "gpt-4o-mini", anthropic: "claude-haiku-4-5",
 };
-const DEFAULT_PRICES = { relay: [0.59, 0.79], groq: [0.59, 0.79], gemini: [0.30, 2.50], openai: [0.15, 0.60], anthropic: [1.00, 5.00] };
+// US$ per million tokens [input, output]. Groq price from console.groq.com/docs/models (Nov 2026).
+const DEFAULT_PRICES = { relay: [0.15, 0.60], groq: [0.15, 0.60], gemini: [0.30, 2.50], openai: [0.15, 0.60], anthropic: [1.00, 5.00] };
+// Models no longer open to normal accounts: replace them if they were saved earlier.
+const RETIRED = ["llama-3.3-70b-versatile"];
+try {
+  if (RETIRED.includes(localStorage.getItem("ww_model"))) {
+    localStorage.setItem("ww_model", "openai/gpt-oss-120b");
+    localStorage.setItem("ww_priceIn", "0.15"); localStorage.setItem("ww_priceOut", "0.60");
+  }
+} catch {}
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
